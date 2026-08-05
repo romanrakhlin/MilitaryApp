@@ -31,9 +31,8 @@ struct ToolRow: View {
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Valor.textTertiary)
             }
-            .padding(14)
-            .background(RoundedRectangle(cornerRadius: 18).fill(Valor.card.opacity(0.5)))
-            .overlay(RoundedRectangle(cornerRadius: 18).strokeBorder(Valor.cardStroke))
+            .padding(16)
+            .homeCardSurface()
         }
         .buttonStyle(ScaleButtonStyle())
     }
