@@ -31,11 +31,17 @@ struct HomeView: View {
         }
     }
 
+    /// First name only — large navigation titles truncate rather than wrap.
+    private var firstName: String {
+        session.profile.name.components(separatedBy: " ").first ?? session.profile.name
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    HomeHeader(title: "\(greeting), \(session.profile.name)") { showSettings = true }
+                    Text("Track and Maximize Your Benefits")
+                        .font(.valorBody(15)).foregroundStyle(Valor.textSecondary)
                     BenefitTotalCard(totalCents: store.totalCents, benefitCount: store.entries.count)
                     trackableSection
                     perksSection
@@ -47,15 +53,16 @@ struct HomeView: View {
             }
             .scrollIndicators(.hidden)
             .background(ValorBackground().ignoresSafeArea())
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("\(greeting), \(firstName)")
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text("Benefits")
-                        .font(.valorFont(20, weight: .black))
-                        .foregroundStyle(Valor.textPrimary)
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button { showSettings = true } label: {
+                        Image(systemName: "gearshape.fill")
+                            .font(.system(size: 18)).foregroundStyle(Valor.textSecondary)
+                    }
                 }
             }
-            .toolbarBackground(.hidden, for: .navigationBar)
         }
         .sheet(isPresented: $showSettings) { SettingsView() }
         .sheet(item: $setupKind) { kind in setupSheet(kind) }
