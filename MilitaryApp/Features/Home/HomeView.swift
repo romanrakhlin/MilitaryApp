@@ -24,6 +24,9 @@ struct HomeView: View {
     @State private var showPro = false
     @State private var showDeleteConfirm = false
     @State private var scrollOffset: CGFloat = 0
+    // `-openSettingsMenu` launch argument opens the dropdown at boot so
+    // automated runs can screenshot it without UI scripting.
+    @State private var showMenu = ProcessInfo.processInfo.arguments.contains("-openSettingsMenu")
 
     private static let privacyPolicyURL = "https://military-app.up.railway.app/privacy"
 
@@ -73,6 +76,7 @@ struct HomeView: View {
             .scrollIndicators(.hidden)
             .background(ValorBackground().ignoresSafeArea())
             .overlay(alignment: .top) { compactBar }
+            .overlay { menuOverlay }
             .toolbar(.hidden, for: .navigationBar)
         }
         .sheet(isPresented: $showPro) { ProUpgradeSheet() }
@@ -105,7 +109,7 @@ struct HomeView: View {
                     .font(.valorBody(15)).foregroundStyle(Valor.textSecondary)
             }
             Spacer()
-            settingsMenu {
+            Button { openMenu() } label: {
                 Image(systemName: "slider.horizontal.3")
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(Valor.blue)
@@ -116,25 +120,33 @@ struct HomeView: View {
         .padding(.top, 6)
     }
 
-    /// The settings dropdown, anchored to whichever button presents it.
-    private func settingsMenu<Anchor: View>(@ViewBuilder label: () -> Anchor) -> some View {
-        Menu {
-            Button { showPro = true } label: {
-                Label("Upgrade to Pro", systemImage: "crown.fill")
+    private func openMenu() {
+        Haptics.selection()
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { showMenu = true }
+    }
+
+    private func closeMenu() {
+        withAnimation(.easeOut(duration: 0.15)) { showMenu = false }
+    }
+
+    /// The custom dropdown, anchored top-trailing where the settings button
+    /// sits, over a tap-to-dismiss backdrop.
+    @ViewBuilder
+    private var menuOverlay: some View {
+        if showMenu {
+            ZStack(alignment: .topTrailing) {
+                Color.black.opacity(0.06)
+                    .ignoresSafeArea()
+                    .onTapGesture { closeMenu() }
+                SettingsDropdown(privacyURL: Self.privacyPolicyURL,
+                                 onUpgrade: { showPro = true },
+                                 onDeleteAccount: { showDeleteConfirm = true },
+                                 onClose: { closeMenu() })
+                    .padding(.trailing, 20)
+                    .padding(.top, 46)
             }
-            Menu {
-                Button(role: .destructive) { showDeleteConfirm = true } label: {
-                    Label("Delete Account", systemImage: "trash")
-                }
-            } label: {
-                Label("Account", systemImage: "person.crop.circle")
-            }
-            if let url = URL(string: Self.privacyPolicyURL) {
-                Link(destination: url) {
-                    Label("Privacy Policy", systemImage: "hand.raised.fill")
-                }
-            }
-        } label: { label() }
+            .transition(.opacity.combined(with: .scale(scale: 0.92, anchor: .topTrailing)))
+        }
     }
 
     private var compactBar: some View {
@@ -142,7 +154,7 @@ struct HomeView: View {
             Text(title)
                 .font(.valorFont(17, weight: .bold)).foregroundStyle(Valor.textPrimary)
             Spacer()
-            settingsMenu {
+            Button { openMenu() } label: {
                 Image(systemName: "slider.horizontal.3")
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(Valor.blue)
