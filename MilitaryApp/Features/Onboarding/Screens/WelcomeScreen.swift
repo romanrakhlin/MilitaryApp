@@ -7,10 +7,9 @@
 
 import SwiftUI
 
-/// The full-bleed welcome screen: get started, or jump straight to sign in.
+/// The full-bleed welcome screen.
 struct WelcomeScreen: View {
     let onStart: () -> Void
-    let onSignIn: () -> Void
 
     var body: some View {
         VStack {

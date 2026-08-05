@@ -18,11 +18,12 @@ final class OnboardingStore: ObservableObject {
     @Published var index = 0
     /// Drives the slide direction so Back reverses the transition.
     @Published var goingForward = true
-    /// Controls the initial mode of the end-of-onboarding auth screen.
-    @Published var startInSignInMode = false
 
-    /// Guards against double navigation while a transition is in flight.
-    private var navLocked = false
+    /// True while a step transition is animating. The coordinator disables all
+    /// hit-testing during this window, so nothing can be tapped (and no stray
+    /// haptics fire) until the slide fully settles. Also guards next()/back()
+    /// against double navigation.
+    @Published private(set) var isTransitioning = false
 
     /// The single navigation animation, reused so forward and back feel identical.
     let navAnimation: Animation = .snappy(duration: 0.42, extraBounce: 0.04)
@@ -45,7 +46,7 @@ final class OnboardingStore: ObservableObject {
 
         if isServing { s.append(.tspKnow) }
 
-        s += [.qualify, .testimonial, .gettingStarted, .madeInAmerica, .dataPrivacy, .auth]
+        s += [.qualify, .testimonial, .gettingStarted, .madeInAmerica, .dataPrivacy]
         return s
     }
 
@@ -64,32 +65,42 @@ final class OnboardingStore: ObservableObject {
     // MARK: - Navigation
 
     func next() {
-        guard !navLocked, index < steps.count - 1 else { return }
-        lockNav()
+        guard !isTransitioning, index < steps.count - 1 else { return }
+        beginTransition()
         goingForward = true
         withAnimation(navAnimation) { index += 1 }
     }
 
     func back() {
-        guard !navLocked, index > 0 else { return }
-        lockNav()
+        guard !isTransitioning, index > 0 else { return }
+        beginTransition()
         goingForward = false
-        withAnimation(navAnimation) { index -= 1 }
+        withAnimation(navAnimation) {
+            index -= 1
+            clearAnswer(for: steps[index])
+        }
     }
 
-    /// Skips straight to the auth screen (used by "Already have an account?").
-    func jumpToAuth(signIn: Bool) {
-        startInSignInMode = signIn
-        goingForward = true
-        withAnimation(navAnimation) { index = steps.count - 1 }
+    /// Returning to a single-choice screen shows it fresh: the previously
+    /// picked option is cleared so nothing appears pre-selected.
+    private func clearAnswer(for step: OnboardingStep) {
+        switch step {
+        case .describe:         profile.status = nil
+        case .goal:             profile.goal = nil
+        case .branch:           profile.branch = nil
+        case .reserveComponent: profile.reserveComponent = nil
+        case .dutyStatus:       profile.dutyStatus = nil
+        case .tspKnow:          profile.knowsTSP = nil
+        default: break   // multi-field screens (pay grade, ZIP) keep their values
+        }
     }
 
-    /// Briefly blocks further navigation while a transition is in flight so a
-    /// second (stale or accidental) advance can't skip a screen.
-    private func lockNav() {
-        navLocked = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { [weak self] in
-            self?.navLocked = false
+    /// Opens the "transition in flight" window: navigation is ignored and the
+    /// coordinator blocks all touches until the slide animation has settled.
+    private func beginTransition() {
+        isTransitioning = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            self?.isTransitioning = false
         }
     }
 }

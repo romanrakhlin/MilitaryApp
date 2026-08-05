@@ -27,5 +27,4 @@ enum OnboardingStep: Hashable {
     case gettingStarted
     case madeInAmerica
     case dataPrivacy
-    case auth
 }

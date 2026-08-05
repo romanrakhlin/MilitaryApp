@@ -11,6 +11,7 @@ import SwiftUI
 /// subtree, renders the back + progress chrome, and routes the current step to
 /// its screen with a directional slide transition.
 struct OnboardingCoordinatorView: View {
+    @EnvironmentObject private var session: SessionStore
     @StateObject private var onboarding: OnboardingStore
 
     init(container: AppContainer) {
@@ -39,6 +40,9 @@ struct OnboardingCoordinatorView: View {
                     ))
                     .id(onboarding.current)
             }
+            // Freeze all input (buttons, options, back) while a step slides in,
+            // so nothing can be tapped until the transition fully finishes.
+            .allowsHitTesting(!onboarding.isTransitioning)
         }
         .environmentObject(onboarding)
     }
@@ -49,12 +53,7 @@ struct OnboardingCoordinatorView: View {
     private var stepContent: some View {
         switch onboarding.current {
         case .welcome:
-            WelcomeScreen(onStart: {
-                onboarding.startInSignInMode = false
-                onboarding.next()
-            }, onSignIn: {
-                onboarding.jumpToAuth(signIn: true)
-            })
+            WelcomeScreen(onStart: onboarding.next)
         case .socialProof:      SocialProofScreen(onNext: onboarding.next)
         case .describe:         DescribeScreen(onNext: onboarding.next)
         case .goal:             GoalScreen(onNext: onboarding.next)
@@ -70,8 +69,14 @@ struct OnboardingCoordinatorView: View {
         case .testimonial:      TestimonialScreen(onNext: onboarding.next)
         case .gettingStarted:   InfoScreen.gettingStarted(onNext: onboarding.next)
         case .madeInAmerica:    InfoScreen.madeInAmerica(onNext: onboarding.next)
-        case .dataPrivacy:      InfoScreen.dataPrivacy(onNext: onboarding.next)
-        case .auth:             AuthScreen()
+        case .dataPrivacy:      InfoScreen.dataPrivacy(onNext: finish)
         }
+    }
+
+    /// Last step's Continue: hand the captured draft to the session and enter
+    /// the app. No account is required to finish onboarding.
+    private func finish() {
+        session.profile = onboarding.profile
+        session.completeOnboarding()
     }
 }

@@ -15,7 +15,7 @@ struct UserProfile: Codable {
     var branch: Branch?
     var reserveComponent: ReserveComponent?
     var dutyStatus: DutyStatus?
-    var payCategory: PayCategory? = .enlisted
+    var payCategory: PayCategory?
     var payGrade: String?
     var yearsServed: Int?
     var goal: PrimaryGoal?

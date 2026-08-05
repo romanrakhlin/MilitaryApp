@@ -7,8 +7,11 @@
 
 import SwiftUI
 
-/// A full-width selectable option row (branch, status, etc.) with a selected
-/// state, checkmark, and haptics.
+/// A full-width selectable option row (branch, status, etc.).
+///
+/// The layout is deliberately identical in both states — text always leading,
+/// a fixed-size radio indicator always reserved on the trailing edge — so
+/// selecting an option never reflows or wraps the label.
 struct OptionButton: View {
     let title: String
     var selected: Bool = false
@@ -19,37 +22,54 @@ struct OptionButton: View {
             Haptics.selection()
             action()
         } label: {
-            HStack {
+            HStack(spacing: 14) {
                 Text(title)
-                    .font(.valorButton(18))
+                    .font(.valorButton(17))
                     .foregroundStyle(selected ? Valor.blue : Valor.textPrimary)
-                if selected {
-                    Spacer(minLength: 8)
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 20))
-                        .foregroundStyle(Valor.blue)
-                        .transition(.scale.combined(with: .opacity))
-                }
+                    .lineLimit(1)
+                Spacer(minLength: 12)
+                indicator
             }
-            .frame(maxWidth: .infinity, alignment: selected ? .leading : .center)
-            .padding(.horizontal, selected ? 20 : 0)
-            .padding(.vertical, 20)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 18)
             .background(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(selected ? AnyShapeStyle(Valor.blue.opacity(0.08))
-                                   : AnyShapeStyle(Valor.card))
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(selected ? AnyShapeStyle(Valor.blue.opacity(0.06))
+                                   : AnyShapeStyle(Color.white))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
                     .strokeBorder(
-                        selected ? AnyShapeStyle(Valor.blue)
+                        selected ? AnyShapeStyle(Valor.brandGradient)
                                  : AnyShapeStyle(Valor.cardStroke),
-                        lineWidth: selected ? 2 : 1
+                        lineWidth: selected ? 1.5 : 1
                     )
             )
-            .shadow(color: Valor.blue.opacity(selected ? 0.18 : 0), radius: 12, y: 4)
+            .shadow(color: selected ? Valor.blue.opacity(0.20) : Color.black.opacity(0.05),
+                    radius: selected ? 14 : 8,
+                    y: selected ? 6 : 3)
+            .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         }
-        .buttonStyle(ScaleButtonStyle())
-        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: selected)
+        .buttonStyle(ScaleButtonStyle(scale: 0.98))
+        .animation(.spring(response: 0.3, dampingFraction: 0.75), value: selected)
+    }
+
+    /// Radio-style selection mark: hollow ring → gradient-filled circle with a
+    /// white dot. Constant footprint in both states.
+    private var indicator: some View {
+        ZStack {
+            Circle()
+                .strokeBorder(Valor.textTertiary.opacity(0.45), lineWidth: 1.5)
+                .opacity(selected ? 0 : 1)
+            Circle()
+                .fill(Valor.brandGradient)
+                .opacity(selected ? 1 : 0)
+            Circle()
+                .fill(.white)
+                .frame(width: 8, height: 8)
+                .scaleEffect(selected ? 1 : 0.1)
+                .opacity(selected ? 1 : 0)
+        }
+        .frame(width: 24, height: 24)
     }
 }
