@@ -25,7 +25,7 @@ struct PerkCategoryButton: View {
                 VStack(spacing: 2) {
                     Text(category.rawValue)
                         .font(.valorButton(15)).foregroundStyle(Valor.textPrimary)
-                    Text("\(count) brands")
+                    Text("\(count) \(category.unitLabel)")
                         .font(.valorBody(12)).foregroundStyle(Valor.textTertiary)
                 }
             }

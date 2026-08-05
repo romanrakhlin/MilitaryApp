@@ -65,34 +65,24 @@ struct HomeView: View {
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 8)
-                    .background(
-                        GeometryReader { geo in
-                            Color.clear.preference(key: HomeScrollOffsetKey.self,
-                                                   value: geo.frame(in: .named("homeScroll")).minY)
-                        }
-                    )
+                    .background(ScrollOffsetReader { scrollOffset = $0 })
                 }
-                .coordinateSpace(name: "homeScroll")
-                .onPreferenceChange(HomeScrollOffsetKey.self) { scrollOffset = $0 }
                 .scrollIndicators(.hidden)
                 .background(ValorBackground().ignoresSafeArea())
+                .overlay(alignment: .top) { compactBar }
                 .overlay(alignment: .topTrailing) {
-                    // Pinned to the top-right corner, independent of the
-                    // header's title padding; hands off to the compact bar's
-                    // button once collapsed. (The gear emoji shows as "?" in
-                    // beta simulator runtimes missing the emoji font — it
-                    // renders correctly on device.)
+                    // Fixed to the top-right corner at all times — it never
+                    // scrolls with the content and stays above the compact
+                    // bar's white cap. (The gear emoji shows as "?" in beta
+                    // simulator runtimes missing the emoji font — it renders
+                    // correctly on device.)
                     settingsMenu {
                         Text("⚙️").font(.system(size: 24))
                             .frame(width: 40, height: 40)
                             .contentShape(Rectangle())
                     }
                     .padding(.trailing, 16)
-                    .opacity(isCollapsed ? 0 : 1)
-                    .allowsHitTesting(!isCollapsed)
-                    .animation(.easeInOut(duration: 0.18), value: isCollapsed)
                 }
-                .overlay(alignment: .top) { compactBar }
                 .toolbar(.hidden, for: .navigationBar)
                 .onAppear {
                     // `-scrollToPerks` launch argument jumps to the perks grid
@@ -187,13 +177,8 @@ struct HomeView: View {
             Text(title)
                 .font(.valorFont(17, weight: .bold)).foregroundStyle(Valor.textPrimary)
             Spacer()
-            settingsMenu {
-                Text("⚙️").font(.system(size: 17))
-                    .frame(width: 32, height: 32)
-                    .contentShape(Rectangle())
-            }
         }
-        .padding(.horizontal, 20).padding(.vertical, 12)
+        .padding(.leading, 20).padding(.trailing, 60).padding(.vertical, 12)
         .opacity(isCollapsed ? 1 : 0)
         .allowsHitTesting(isCollapsed)
         .background {

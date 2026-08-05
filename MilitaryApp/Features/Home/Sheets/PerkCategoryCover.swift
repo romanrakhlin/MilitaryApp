@@ -36,7 +36,8 @@ struct PerkCategoryCover: View {
                         .padding(.bottom, 6)
 
                         ForEach(benefits) { benefit in
-                            benefitCard(benefit)
+                            BenefitLinkCard(name: benefit.name, badge: benefit.badge,
+                                            blurb: benefit.blurb, urlString: benefit.urlString)
                         }
                         Color.clear.frame(height: 24)
                     }
@@ -52,43 +53,10 @@ struct PerkCategoryCover: View {
                         Image(systemName: "xmark")
                             .font(.system(size: 13, weight: .bold))
                             .foregroundStyle(Valor.textSecondary)
-                            .frame(width: 30, height: 30)
-                            .background(Circle().fill(Valor.card))
                     }
                 }
             }
         }
         .preferredColorScheme(.light)
-    }
-
-    private func benefitCard(_ benefit: InfoBenefit) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .center) {
-                Text(benefit.name)
-                    .font(.valorButton(17)).foregroundStyle(Valor.textPrimary)
-                Spacer(minLength: 8)
-                Text(benefit.badge)
-                    .font(.valorFont(12, weight: .bold)).foregroundStyle(Valor.green)
-                    .padding(.horizontal, 10).padding(.vertical, 6)
-                    .background(Capsule().fill(Valor.green.opacity(0.12)))
-            }
-            Text(benefit.blurb)
-                .font(.valorBody(14)).foregroundStyle(Valor.textSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-            if let url = URL(string: benefit.urlString) {
-                Link(destination: url) {
-                    HStack(spacing: 6) {
-                        Text("Visit official website")
-                        Image(systemName: "arrow.up.right")
-                    }
-                    .font(.valorFont(14, weight: .bold)).foregroundStyle(Valor.blue)
-                    .padding(.horizontal, 14).padding(.vertical, 9)
-                    .background(Capsule().fill(Valor.blue.opacity(0.10)))
-                }
-            }
-        }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .homeCardSurface()
     }
 }

@@ -61,6 +61,10 @@ final class HomeStore: ObservableObject {
         content.infoBenefits().filter { $0.category == category }
     }
 
+    var federalBenefits: [StateBenefit] { content.federalBenefits() }
+
+    var stateGuides: [StateGuide] { content.stateGuides() }
+
     // MARK: Lifecycle
 
     func load() {
