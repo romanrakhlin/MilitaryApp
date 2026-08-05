@@ -61,19 +61,6 @@ struct HomeView: View {
                 }
                 .scrollIndicators(.hidden)
                 .background(ValorBackground().ignoresSafeArea())
-                .overlay(alignment: .topTrailing) {
-                    // Fixed to the top-right corner at all times — it never
-                    // scrolls with the content and stays above the compact
-                    // bar's white cap. (The gear emoji shows as "?" in beta
-                    // simulator runtimes missing the emoji font — it renders
-                    // correctly on device.)
-                    settingsMenu {
-                        Text("⚙️").font(.system(size: 24))
-                            .frame(width: 40, height: 40)
-                            .contentShape(Rectangle())
-                    }
-                    .padding(.trailing, 16)
-                }
                 .toolbar(.hidden, for: .navigationBar)
                 .onAppear {
                     // `-scrollToPerks` launch argument jumps to the perks grid
@@ -86,7 +73,20 @@ struct HomeView: View {
                 }
             }
         }
-        .sheet(isPresented: $showPro) { ProUpgradeSheet() }
+        // Outermost overlay: the settings button is fixed to the screen's
+        // top-right corner, fully decoupled from the scroll view — nothing
+        // about scrolling can move it. (The gear emoji shows as "?" in beta
+        // simulator runtimes missing the emoji font — it renders correctly
+        // on device.)
+        .overlay(alignment: .topTrailing) {
+            settingsMenu {
+                Text("⚙️").font(.system(size: 24))
+                    .frame(width: 40, height: 40)
+                    .contentShape(Rectangle())
+            }
+            .padding(.trailing, 16)
+        }
+        .fullScreenCover(isPresented: $showPro) { PaywallScreen() }
         .confirmationDialog("Delete your account?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
             Button("Delete Account", role: .destructive) {
                 Task { await session.deleteAccount() }
