@@ -53,30 +53,41 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    header
-                    BenefitTotalCard(totalCents: store.totalCents, benefitCount: store.entries.count)
-                    trackableSection
-                    perksSection
-                    toolsSection
-                    Color.clear.frame(height: 24)
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 8)
-                .background(
-                    GeometryReader { geo in
-                        Color.clear.preference(key: HomeScrollOffsetKey.self,
-                                               value: geo.frame(in: .named("homeScroll")).minY)
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 20) {
+                        header
+                        BenefitTotalCard(totalCents: store.totalCents, benefitCount: store.entries.count)
+                        trackableSection
+                        perksSection.id("perks")
+                        toolsSection
+                        Color.clear.frame(height: 24)
                     }
-                )
+                    .padding(.horizontal, 20)
+                    .padding(.top, 8)
+                    .background(
+                        GeometryReader { geo in
+                            Color.clear.preference(key: HomeScrollOffsetKey.self,
+                                                   value: geo.frame(in: .named("homeScroll")).minY)
+                        }
+                    )
+                }
+                .coordinateSpace(name: "homeScroll")
+                .onPreferenceChange(HomeScrollOffsetKey.self) { scrollOffset = $0 }
+                .scrollIndicators(.hidden)
+                .background(ValorBackground().ignoresSafeArea())
+                .overlay(alignment: .top) { compactBar }
+                .toolbar(.hidden, for: .navigationBar)
+                .onAppear {
+                    // `-scrollToPerks` launch argument jumps to the perks grid
+                    // for automated screenshots.
+                    if ProcessInfo.processInfo.arguments.contains("-scrollToPerks") {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                            proxy.scrollTo("perks", anchor: .top)
+                        }
+                    }
+                }
             }
-            .coordinateSpace(name: "homeScroll")
-            .onPreferenceChange(HomeScrollOffsetKey.self) { scrollOffset = $0 }
-            .scrollIndicators(.hidden)
-            .background(ValorBackground().ignoresSafeArea())
-            .overlay(alignment: .top) { compactBar }
-            .toolbar(.hidden, for: .navigationBar)
         }
         .sheet(isPresented: $showPro) { ProUpgradeSheet() }
         .confirmationDialog("Delete your account?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
@@ -93,7 +104,14 @@ struct HomeView: View {
                               benefits: store.infoBenefits(in: category))
         }
         .sheet(isPresented: $showCalculator) { RatingCalculatorSheet(store: store) }
-        .onAppear { store.load() }
+        .onAppear {
+            store.load()
+            // `-openStatePerks` launch argument boots straight into the State
+            // Benefits browser for automated screenshots.
+            if ProcessInfo.processInfo.arguments.contains("-openStatePerks") {
+                perkCategory = .state
+            }
+        }
     }
 
     // MARK: Header + compact title bar
@@ -109,14 +127,12 @@ struct HomeView: View {
             }
             Spacer()
             settingsMenu {
-                Image(systemName: "slider.horizontal.3")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(Valor.blue)
-                    .frame(width: 32, height: 32)
-                    .background(Circle().fill(Valor.blue.opacity(0.10)))
+                Image(systemName: "gearshape.fill")
+                    .font(.system(size: 20))
+                    .foregroundStyle(Valor.textPrimary)
             }
         }
-        .padding(.top, 22)
+        .padding(.top, 40)
     }
 
     /// The system settings menu, anchored to whichever button presents it.
@@ -146,9 +162,9 @@ struct HomeView: View {
                 .font(.valorFont(17, weight: .bold)).foregroundStyle(Valor.textPrimary)
             Spacer()
             settingsMenu {
-                Image(systemName: "slider.horizontal.3")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Valor.blue)
+                Image(systemName: "gearshape.fill")
+                    .font(.system(size: 17))
+                    .foregroundStyle(Valor.textPrimary)
             }
         }
         .padding(.horizontal, 20).padding(.vertical, 12)
@@ -186,7 +202,8 @@ struct HomeView: View {
         VStack(alignment: .leading, spacing: 12) {
             HomeSectionHeader(title: "Perks & Discounts",
                               subtitle: "Browse military benefits by category")
-            HStack(spacing: 12) {
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)],
+                      spacing: 12) {
                 ForEach(InfoBenefitCategory.allCases) { category in
                     PerkCategoryButton(category: category,
                                        count: store.infoBenefits(in: category).count) {
