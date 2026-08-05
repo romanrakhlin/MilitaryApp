@@ -17,4 +17,6 @@ protocol BenefitsRepository {
     func loadSavedRatings() -> [SavedRating]
     func save(rating: SavedRating)
     func deleteRating(id: UUID)
+
+    func removeAllLocalData()
 }

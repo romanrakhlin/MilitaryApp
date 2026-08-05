@@ -46,6 +46,13 @@ struct BenefitsRepositoryLive: BenefitsRepository {
         encode(loadSavedRatings().filter { $0.id != id }, key: Self.ratingsKey)
     }
 
+    // MARK: Account deletion
+
+    func removeAllLocalData() {
+        UserDefaults.standard.removeObject(forKey: Self.entriesKey)
+        UserDefaults.standard.removeObject(forKey: Self.ratingsKey)
+    }
+
     // MARK: Codec helpers
 
     private func decode<T: Decodable>(_ type: T.Type, key: String) -> T? {

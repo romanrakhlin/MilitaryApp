@@ -30,6 +30,8 @@ final class SessionStore: ObservableObject {
     private let updateProfile: UpdateProfileUseCase
     private let completeOnboardingUseCase: CompleteOnboardingUseCase
     private let logoutUseCase: LogoutUseCase
+    private let deleteAccountUseCase: DeleteAccountUseCase
+    private let clearLocalBenefits: ClearLocalBenefitsUseCase
 
     private static let onboardKey = "valor.hasCompletedOnboarding"
 
@@ -39,7 +41,9 @@ final class SessionStore: ObservableObject {
          loadProfile: LoadProfileUseCase,
          updateProfile: UpdateProfileUseCase,
          completeOnboarding: CompleteOnboardingUseCase,
-         logout: LogoutUseCase) {
+         logout: LogoutUseCase,
+         deleteAccount: DeleteAccountUseCase,
+         clearLocalBenefits: ClearLocalBenefitsUseCase) {
         self.restoreSession = restoreSession
         self.login = login
         self.register = register
@@ -47,6 +51,8 @@ final class SessionStore: ObservableObject {
         self.updateProfile = updateProfile
         self.completeOnboardingUseCase = completeOnboarding
         self.logoutUseCase = logout
+        self.deleteAccountUseCase = deleteAccount
+        self.clearLocalBenefits = clearLocalBenefits
         self.hasCompletedOnboarding = UserDefaults.standard.bool(forKey: Self.onboardKey)
     }
 
@@ -88,6 +94,15 @@ final class SessionStore: ObservableObject {
         logoutUseCase()
         isAuthenticated = false
         profile = UserProfile()
+    }
+
+    /// Deletes the account on the backend, then wipes everything local —
+    /// tracked benefits, session, profile — and returns to onboarding.
+    func deleteAccount() async {
+        try? await deleteAccountUseCase()   // local wipe proceeds even if the server call fails
+        clearLocalBenefits()
+        logout()
+        resetOnboarding()
     }
 
     // MARK: - Onboarding completion

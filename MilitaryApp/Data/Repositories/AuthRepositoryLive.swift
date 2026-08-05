@@ -25,6 +25,11 @@ struct AuthRepositoryLive: AuthRepository {
                                body: AuthBody(email: email, password: password, name: name))
     }
 
+    func deleteAccount() async throws {
+        let _: Empty = try await api.delete("/auth/account")
+        tokens.clear()
+    }
+
     private func authenticate(path: String, body: AuthBody) async throws -> Account {
         let res: LoginResponse = try await api.post(path, body, authorized: false)
         tokens.accessToken = res.accessToken

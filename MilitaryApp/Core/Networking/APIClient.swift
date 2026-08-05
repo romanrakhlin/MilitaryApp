@@ -55,6 +55,10 @@ final class APIClient {
         try await send(method: .patch, path: path, body: try encoder.encode(body), authorized: authorized)
     }
 
+    func delete<T: Decodable>(_ path: String, authorized: Bool = true) async throws -> T {
+        try await send(method: .delete, path: path, body: nil, authorized: authorized)
+    }
+
     // MARK: Core
 
     private func send<T: Decodable>(method: HTTPMethod, path: String, body: Data?, authorized: Bool,

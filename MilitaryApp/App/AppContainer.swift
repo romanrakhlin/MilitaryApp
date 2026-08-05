@@ -48,7 +48,9 @@ final class AppContainer {
             loadProfile: LoadProfileUseCase(repository: profileRepository),
             updateProfile: UpdateProfileUseCase(repository: profileRepository),
             completeOnboarding: CompleteOnboardingUseCase(repository: profileRepository),
-            logout: LogoutUseCase(tokens: tokenStore)
+            logout: LogoutUseCase(tokens: tokenStore),
+            deleteAccount: DeleteAccountUseCase(repository: authRepository),
+            clearLocalBenefits: ClearLocalBenefitsUseCase(repository: benefitsRepository)
         )
     }
 

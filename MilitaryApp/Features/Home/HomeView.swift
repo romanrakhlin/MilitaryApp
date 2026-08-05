@@ -18,11 +18,14 @@ struct HomeView: View {
     @EnvironmentObject private var session: SessionStore
     @StateObject private var store: HomeStore
 
-    @State private var showSettings = false
     @State private var setupKind: TrackedBenefitKind?
     @State private var perkCategory: InfoBenefitCategory?
     @State private var showCalculator = false
+    @State private var showPro = false
+    @State private var showDeleteConfirm = false
     @State private var scrollOffset: CGFloat = 0
+
+    private static let privacyPolicyURL = "https://military-app.up.railway.app/privacy"
 
     init(container: AppContainer) {
         _store = StateObject(wrappedValue: container.makeHomeStore())
@@ -72,7 +75,15 @@ struct HomeView: View {
             .overlay(alignment: .top) { compactBar }
             .toolbar(.hidden, for: .navigationBar)
         }
-        .sheet(isPresented: $showSettings) { SettingsView() }
+        .sheet(isPresented: $showPro) { ProUpgradeSheet() }
+        .confirmationDialog("Delete your account?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
+            Button("Delete Account", role: .destructive) {
+                Task { await session.deleteAccount() }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This permanently deletes your account and all tracked data. This can't be undone.")
+        }
         .sheet(item: $setupKind) { kind in setupSheet(kind) }
         .fullScreenCover(item: $perkCategory) { category in
             PerkCategoryCover(category: category,
@@ -94,7 +105,7 @@ struct HomeView: View {
                     .font(.valorBody(15)).foregroundStyle(Valor.textSecondary)
             }
             Spacer()
-            Button { showSettings = true } label: {
+            settingsMenu {
                 Image(systemName: "slider.horizontal.3")
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(Valor.blue)
@@ -105,12 +116,33 @@ struct HomeView: View {
         .padding(.top, 6)
     }
 
+    /// The settings dropdown, anchored to whichever button presents it.
+    private func settingsMenu<Anchor: View>(@ViewBuilder label: () -> Anchor) -> some View {
+        Menu {
+            Button { showPro = true } label: {
+                Label("Upgrade to Pro", systemImage: "crown.fill")
+            }
+            Menu {
+                Button(role: .destructive) { showDeleteConfirm = true } label: {
+                    Label("Delete Account", systemImage: "trash")
+                }
+            } label: {
+                Label("Account", systemImage: "person.crop.circle")
+            }
+            if let url = URL(string: Self.privacyPolicyURL) {
+                Link(destination: url) {
+                    Label("Privacy Policy", systemImage: "hand.raised.fill")
+                }
+            }
+        } label: { label() }
+    }
+
     private var compactBar: some View {
         HStack {
             Text(title)
                 .font(.valorFont(17, weight: .bold)).foregroundStyle(Valor.textPrimary)
             Spacer()
-            Button { showSettings = true } label: {
+            settingsMenu {
                 Image(systemName: "slider.horizontal.3")
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(Valor.blue)
