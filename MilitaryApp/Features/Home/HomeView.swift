@@ -49,6 +49,9 @@ struct HomeView: View {
     }
 
     private var title: String { "\(greeting), \(firstName)" }
+    /// Content has started sliding under the status bar → show the white cap.
+    private var isScrolled: Bool { scrollOffset < -12 }
+    /// The large greeting is gone → show the compact title.
     private var isCollapsed: Bool { scrollOffset < -56 }
 
     var body: some View {
@@ -117,7 +120,7 @@ struct HomeView: View {
                     .background(Circle().fill(Valor.blue.opacity(0.10)))
             }
         }
-        .padding(.top, 6)
+        .padding(.top, 22)
     }
 
     private func openMenu() {
@@ -161,11 +164,18 @@ struct HomeView: View {
             }
         }
         .padding(.horizontal, 20).padding(.vertical, 12)
-        .background {
-            Rectangle().fill(.ultraThinMaterial).ignoresSafeArea(edges: .top)
-        }
         .opacity(isCollapsed ? 1 : 0)
+        .allowsHitTesting(isCollapsed)
+        .background {
+            // Solid white cap over the status-bar area, on as soon as content
+            // scrolls underneath — before the compact title itself appears.
+            Rectangle().fill(Color.white)
+                .shadow(color: .black.opacity(0.05), radius: 10, y: 3)
+                .ignoresSafeArea(edges: .top)
+                .opacity(isScrolled ? 1 : 0)
+        }
         .animation(.easeInOut(duration: 0.18), value: isCollapsed)
+        .animation(.easeInOut(duration: 0.15), value: isScrolled)
     }
 
     // MARK: Section 1 — trackable benefits
