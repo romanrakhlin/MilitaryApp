@@ -151,22 +151,29 @@ struct HomeView: View {
         .padding(.top, 40)
     }
 
+    /// Accent-tinted SF symbol for menu rows: UIMenu repaints template images
+    /// black, but an `.alwaysOriginal` pre-tinted image keeps its color.
+    private func menuIcon(_ systemName: String) -> Image {
+        Image(uiImage: UIImage(systemName: systemName)?
+            .withTintColor(UIColor(Valor.blue), renderingMode: .alwaysOriginal) ?? UIImage())
+    }
+
     /// The system settings menu, anchored to whichever button presents it.
     private func settingsMenu<Anchor: View>(@ViewBuilder label: () -> Anchor) -> some View {
         Menu {
             Button { showPro = true } label: {
-                Label("Upgrade to Pro", systemImage: "crown.fill")
+                Label { Text("Upgrade to Pro") } icon: { menuIcon("crown.fill") }
             }
             Menu {
                 Button(role: .destructive) { showDeleteConfirm = true } label: {
                     Label("Delete Account", systemImage: "trash")
                 }
             } label: {
-                Label("Account", systemImage: "person.crop.circle")
+                Label { Text("Account") } icon: { menuIcon("person.crop.circle") }
             }
             if let url = URL(string: Self.privacyPolicyURL) {
                 Link(destination: url) {
-                    Label("Privacy Policy", systemImage: "hand.raised.fill")
+                    Label { Text("Privacy Policy") } icon: { menuIcon("hand.raised.fill") }
                 }
             }
         } label: { label() }
