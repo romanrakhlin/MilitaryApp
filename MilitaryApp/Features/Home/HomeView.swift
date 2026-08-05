@@ -76,6 +76,22 @@ struct HomeView: View {
                 .onPreferenceChange(HomeScrollOffsetKey.self) { scrollOffset = $0 }
                 .scrollIndicators(.hidden)
                 .background(ValorBackground().ignoresSafeArea())
+                .overlay(alignment: .topTrailing) {
+                    // Pinned to the top-right corner, independent of the
+                    // header's title padding; hands off to the compact bar's
+                    // button once collapsed. (The gear emoji shows as "?" in
+                    // beta simulator runtimes missing the emoji font — it
+                    // renders correctly on device.)
+                    settingsMenu {
+                        Text("⚙️").font(.system(size: 24))
+                            .frame(width: 40, height: 40)
+                            .contentShape(Rectangle())
+                    }
+                    .padding(.trailing, 16)
+                    .opacity(isCollapsed ? 0 : 1)
+                    .allowsHitTesting(!isCollapsed)
+                    .animation(.easeInOut(duration: 0.18), value: isCollapsed)
+                }
                 .overlay(alignment: .top) { compactBar }
                 .toolbar(.hidden, for: .navigationBar)
                 .onAppear {
@@ -100,8 +116,13 @@ struct HomeView: View {
         }
         .sheet(item: $setupKind) { kind in setupSheet(kind) }
         .fullScreenCover(item: $perkCategory) { category in
-            PerkCategoryCover(category: category,
-                              benefits: store.infoBenefits(in: category))
+            if category == .state {
+                StateBenefitsCover(federalBenefits: store.federalBenefits,
+                                   states: store.stateGuides)
+            } else {
+                PerkCategoryCover(category: category,
+                                  benefits: store.infoBenefits(in: category))
+            }
         }
         .sheet(isPresented: $showCalculator) { RatingCalculatorSheet(store: store) }
         .onAppear {
@@ -126,11 +147,6 @@ struct HomeView: View {
                     .font(.valorBody(15)).foregroundStyle(Valor.textSecondary)
             }
             Spacer()
-            settingsMenu {
-                Image(systemName: "gearshape.fill")
-                    .font(.system(size: 20))
-                    .foregroundStyle(Valor.textPrimary)
-            }
         }
         .padding(.top, 40)
     }
@@ -154,6 +170,9 @@ struct HomeView: View {
                 }
             }
         } label: { label() }
+        // Plain style so the anchor keeps its own rendering — the default
+        // menu style tints the label, which turns emoji into "?" glyphs.
+        .buttonStyle(.plain)
     }
 
     private var compactBar: some View {
@@ -162,9 +181,9 @@ struct HomeView: View {
                 .font(.valorFont(17, weight: .bold)).foregroundStyle(Valor.textPrimary)
             Spacer()
             settingsMenu {
-                Image(systemName: "gearshape.fill")
-                    .font(.system(size: 17))
-                    .foregroundStyle(Valor.textPrimary)
+                Text("⚙️").font(.system(size: 17))
+                    .frame(width: 32, height: 32)
+                    .contentShape(Rectangle())
             }
         }
         .padding(.horizontal, 20).padding(.vertical, 12)
@@ -206,7 +225,9 @@ struct HomeView: View {
                       spacing: 12) {
                 ForEach(InfoBenefitCategory.allCases) { category in
                     PerkCategoryButton(category: category,
-                                       count: store.infoBenefits(in: category).count) {
+                                       count: category == .state
+                                           ? store.stateGuides.count
+                                           : store.infoBenefits(in: category).count) {
                         perkCategory = category
                     }
                 }
