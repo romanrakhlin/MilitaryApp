@@ -13,9 +13,12 @@ struct RootCoordinatorView: View {
     @EnvironmentObject private var session: SessionStore
     let container: AppContainer
 
+    /// TESTING ONLY — set to `false` to restore the normal onboarding flow.
+    private let skipOnboardingForTesting = true
+
     var body: some View {
         Group {
-            if session.hasCompletedOnboarding {
+            if skipOnboardingForTesting || session.hasCompletedOnboarding {
                 MainTabView(container: container)
                     .transition(.opacity)
             } else {
