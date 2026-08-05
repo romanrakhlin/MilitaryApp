@@ -10,10 +10,8 @@ import SwiftUI
 /// The benefits dashboard: headline tracked total, the configurable benefits
 /// that feed it, informational perks with links out, and calculator tools.
 ///
-/// The greeting is the screen's title. The system nav bar stays hidden (in a
-/// TabView the collapsed system title falls back to the tab name — "Home");
-/// instead a compact bar with the greeting fades in once the header scrolls
-/// away.
+/// No navigation bar: the greeting title scrolls away with the content, and
+/// the settings button stays fixed in the top-right corner.
 struct HomeView: View {
     @EnvironmentObject private var session: SessionStore
     @StateObject private var store: HomeStore
@@ -23,7 +21,6 @@ struct HomeView: View {
     @State private var showCalculator = false
     @State private var showPro = false
     @State private var showDeleteConfirm = false
-    @State private var scrollOffset: CGFloat = 0
 
     private static let privacyPolicyURL = "https://military-app.up.railway.app/privacy"
 
@@ -46,10 +43,6 @@ struct HomeView: View {
     }
 
     private var title: String { "\(greeting), \(firstName)" }
-    /// Content has started sliding under the status bar → show the white cap.
-    private var isScrolled: Bool { scrollOffset < -12 }
-    /// The large greeting is gone → show the compact title.
-    private var isCollapsed: Bool { scrollOffset < -56 }
 
     var body: some View {
         NavigationStack {
@@ -65,11 +58,9 @@ struct HomeView: View {
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 8)
-                    .background(ScrollOffsetReader { scrollOffset = $0 })
                 }
                 .scrollIndicators(.hidden)
                 .background(ValorBackground().ignoresSafeArea())
-                .overlay(alignment: .top) { compactBar }
                 .overlay(alignment: .topTrailing) {
                     // Fixed to the top-right corner at all times — it never
                     // scrolls with the content and stays above the compact
@@ -121,6 +112,8 @@ struct HomeView: View {
             // Benefits browser for automated screenshots.
             if ProcessInfo.processInfo.arguments.contains("-openStatePerks") {
                 perkCategory = .state
+            } else if ProcessInfo.processInfo.arguments.contains("-openAirlines") {
+                perkCategory = .airlines
             }
         }
     }
@@ -170,27 +163,6 @@ struct HomeView: View {
         // Plain style so the anchor keeps its own rendering — the default
         // menu style tints the label, which turns emoji into "?" glyphs.
         .buttonStyle(.plain)
-    }
-
-    private var compactBar: some View {
-        HStack {
-            Text(title)
-                .font(.valorFont(17, weight: .bold)).foregroundStyle(Valor.textPrimary)
-            Spacer()
-        }
-        .padding(.leading, 20).padding(.trailing, 60).padding(.vertical, 12)
-        .opacity(isCollapsed ? 1 : 0)
-        .allowsHitTesting(isCollapsed)
-        .background {
-            // Solid white cap over the status-bar area, on as soon as content
-            // scrolls underneath — before the compact title itself appears.
-            Rectangle().fill(Color.white)
-                .shadow(color: .black.opacity(0.05), radius: 10, y: 3)
-                .ignoresSafeArea(edges: .top)
-                .opacity(isScrolled ? 1 : 0)
-        }
-        .animation(.easeInOut(duration: 0.18), value: isCollapsed)
-        .animation(.easeInOut(duration: 0.15), value: isScrolled)
     }
 
     // MARK: Section 1 — trackable benefits
