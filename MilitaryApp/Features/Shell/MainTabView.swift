@@ -7,9 +7,9 @@
 
 import SwiftUI
 
-/// The authenticated app shell: Home, Explore, and the Map, in the native
-/// SwiftUI tab bar tinted to the Valor accent. Threads the DI container down
-/// to each tab so it can assemble its own store.
+/// The authenticated app shell: Home and the Map, in the native SwiftUI tab
+/// bar tinted to the Valor accent. Threads the DI container down to each tab
+/// so it can assemble its own store.
 struct MainTabView: View {
     let container: AppContainer
     @State private var tab: ValorTab = .home
@@ -28,8 +28,7 @@ struct MainTabView: View {
     @ViewBuilder
     private func tabContent(_ t: ValorTab) -> some View {
         switch t {
-        case .home: HomeView(container: container)     // benefits dashboard is the primary screen
-        case .explore: ExploreView()
+        case .home: HomeView(container: container)      // benefits dashboard
         case .map: DiscoverView(container: container)   // the map
         }
     }

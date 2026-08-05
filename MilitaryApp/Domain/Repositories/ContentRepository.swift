@@ -7,9 +7,11 @@
 
 import Foundation
 
-/// Editorial / sample content port: national chains and fallback articles that
-/// aren't (yet) served by the backend.
+/// Editorial / sample content port: national chains, fallback articles, and
+/// the benefit catalogs that aren't (yet) served by the backend.
 protocol ContentRepository {
     func chains() -> [NationalChain]
     func articles() -> [Article]
+    func creditCards() -> [MilitaryCreditCard]
+    func infoBenefits() -> [InfoBenefit]
 }

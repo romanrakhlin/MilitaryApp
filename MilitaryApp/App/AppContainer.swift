@@ -25,6 +25,7 @@ final class AppContainer {
     let homeRepository: HomeRepository
     let placesRepository: PlacesRepository
     let contentRepository: ContentRepository
+    let benefitsRepository: BenefitsRepository
 
     init() {
         api = APIClient(tokens: tokenStore)
@@ -33,6 +34,7 @@ final class AppContainer {
         homeRepository = HomeRepositoryLive(api: api)
         placesRepository = PlacesRepositoryLive(api: api)
         contentRepository = ContentRepositoryLive()
+        benefitsRepository = BenefitsRepositoryLive()
     }
 
     // MARK: Store factories
@@ -57,7 +59,13 @@ final class AppContainer {
 
     @MainActor
     func makeHomeStore() -> HomeStore {
-        HomeStore(loadHome: LoadHomeUseCase(repository: homeRepository),
+        HomeStore(loadEntries: LoadTrackedBenefitsUseCase(repository: benefitsRepository),
+                  saveEntry: SaveTrackedBenefitUseCase(repository: benefitsRepository),
+                  removeEntry: RemoveTrackedBenefitUseCase(repository: benefitsRepository),
+                  loadRatings: LoadSavedRatingsUseCase(repository: benefitsRepository),
+                  saveRating: SaveRatingUseCase(repository: benefitsRepository),
+                  deleteRating: DeleteRatingUseCase(repository: benefitsRepository),
+                  combineRatings: CalculateCombinedRatingUseCase(),
                   content: contentRepository)
     }
 
