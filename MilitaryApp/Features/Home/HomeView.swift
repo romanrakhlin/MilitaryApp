@@ -58,6 +58,19 @@ struct HomeView: View {
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 8)
+                    // Anchored to the content's top-right corner: visible in
+                    // its usual spot on open, and scrolls away with the
+                    // header. (The gear emoji shows as "?" in beta simulator
+                    // runtimes missing the emoji font — it renders correctly
+                    // on device.)
+                    .overlay(alignment: .topTrailing) {
+                        settingsMenu {
+                            Text("⚙️").font(.system(size: 24))
+                                .frame(width: 40, height: 40)
+                                .contentShape(Rectangle())
+                        }
+                        .padding(.trailing, 16)
+                    }
                 }
                 .scrollIndicators(.hidden)
                 .background(ValorBackground().ignoresSafeArea())
@@ -72,19 +85,6 @@ struct HomeView: View {
                     }
                 }
             }
-        }
-        // Outermost overlay: the settings button is fixed to the screen's
-        // top-right corner, fully decoupled from the scroll view — nothing
-        // about scrolling can move it. (The gear emoji shows as "?" in beta
-        // simulator runtimes missing the emoji font — it renders correctly
-        // on device.)
-        .overlay(alignment: .topTrailing) {
-            settingsMenu {
-                Text("⚙️").font(.system(size: 24))
-                    .frame(width: 40, height: 40)
-                    .contentShape(Rectangle())
-            }
-            .padding(.trailing, 16)
         }
         .fullScreenCover(isPresented: $showPro) { PaywallScreen() }
         .confirmationDialog("Delete your account?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
