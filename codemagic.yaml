@@ -13,7 +13,7 @@ workflows:
         BUNDLE_ID: "com.uncoveredlabs.valor"
         XCODE_PROJECT: "MilitaryApp.xcodeproj"
         XCODE_SCHEME: "MilitaryApp"
-        APP_STORE_APPLE_ID: 0000000000 # TODO: set to the app's Apple ID from App Store Connect
+        APP_STORE_APPLE_ID: 6798432555
       xcode: latest
     scripts:
       - name: Set up provisioning profiles settings on Xcode project
