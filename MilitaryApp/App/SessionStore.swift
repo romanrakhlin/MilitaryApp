@@ -21,9 +21,12 @@ final class SessionStore: ObservableObject {
         didSet { UserDefaults.standard.set(hasCompletedOnboarding, forKey: Self.onboardKey) }
     }
     @Published private(set) var isAuthenticated = false
-    @Published var profile = UserProfile()
+    @Published var profile = UserProfile() {
+        didSet { Self.persist(profile) }
+    }
 
     private let restoreSession: RestoreSessionUseCase
+    private let deviceLogin: DeviceLoginUseCase
     private let login: LoginUseCase
     private let register: RegisterUseCase
     private let loadProfile: LoadProfileUseCase
@@ -32,10 +35,14 @@ final class SessionStore: ObservableObject {
     private let logoutUseCase: LogoutUseCase
     private let deleteAccountUseCase: DeleteAccountUseCase
     private let clearLocalBenefits: ClearLocalBenefitsUseCase
+    private let seedTrackedBenefits: SeedTrackedBenefitsUseCase
 
     private static let onboardKey = "valor.hasCompletedOnboarding"
+    private static let profileKey = "valor.profile"
+    private static let deviceIDKey = "valor.deviceID"
 
     init(restoreSession: RestoreSessionUseCase,
+         deviceLogin: DeviceLoginUseCase,
          login: LoginUseCase,
          register: RegisterUseCase,
          loadProfile: LoadProfileUseCase,
@@ -43,8 +50,10 @@ final class SessionStore: ObservableObject {
          completeOnboarding: CompleteOnboardingUseCase,
          logout: LogoutUseCase,
          deleteAccount: DeleteAccountUseCase,
-         clearLocalBenefits: ClearLocalBenefitsUseCase) {
+         clearLocalBenefits: ClearLocalBenefitsUseCase,
+         seedTrackedBenefits: SeedTrackedBenefitsUseCase) {
         self.restoreSession = restoreSession
+        self.deviceLogin = deviceLogin
         self.login = login
         self.register = register
         self.loadProfile = loadProfile
@@ -53,16 +62,28 @@ final class SessionStore: ObservableObject {
         self.logoutUseCase = logout
         self.deleteAccountUseCase = deleteAccount
         self.clearLocalBenefits = clearLocalBenefits
+        self.seedTrackedBenefits = seedTrackedBenefits
         self.hasCompletedOnboarding = UserDefaults.standard.bool(forKey: Self.onboardKey)
+        if let saved = Self.loadPersistedProfile() { self.profile = saved }
     }
 
     // MARK: - Lifecycle
 
-    /// Called once at launch: if a session token is held, restore the account.
+    /// Called once at launch: restore the held session, or fall back to an
+    /// anonymous device-scoped sign-in so authenticated endpoints (places,
+    /// profile) work from the very first launch.
     func bootstrap() async {
-        guard let account = try? await restoreSession() else { return }
-        apply(account)
-        if account.onboardingComplete { hasCompletedOnboarding = true }
+        if let account = try? await restoreSession() {
+            apply(account)
+            if account.onboardingComplete { hasCompletedOnboarding = true }
+            return
+        }
+        if let account = try? await deviceLogin(deviceId: Self.deviceID()) {
+            // Keep any locally captured answers: the fresh anonymous account's
+            // empty profile must not clobber a finished onboarding draft.
+            isAuthenticated = true
+            if !hasCompletedOnboarding { profile = account.profile }
+        }
     }
 
     /// Existing user signing in at the end of onboarding.
@@ -107,6 +128,19 @@ final class SessionStore: ObservableObject {
 
     // MARK: - Onboarding completion
 
+    /// Last onboarding step: adopt the captured draft, push it to the backend
+    /// (best-effort — the device session normally exists by now), and enter
+    /// the app.
+    func finishOnboarding(draft: UserProfile) async {
+        profile = draft
+        seedTrackedBenefits(profile: draft)
+        if isAuthenticated {
+            if let saved = try? await updateProfile(draft) { apply(saved) }
+            try? await completeOnboardingUseCase()
+        }
+        completeOnboarding()
+    }
+
     func completeOnboarding() {
         withAnimation(.easeInOut) { hasCompletedOnboarding = true }
     }
@@ -121,5 +155,32 @@ final class SessionStore: ObservableObject {
     private func apply(_ account: Account) {
         isAuthenticated = true
         profile = account.profile
+    }
+
+    /// Stable per-install identifier for the anonymous device session,
+    /// generated on first launch. A reinstall gets a fresh ID (and thus a
+    /// fresh anonymous account).
+    private static func deviceID() -> String {
+        if let existing = UserDefaults.standard.string(forKey: deviceIDKey) { return existing }
+        let fresh = UUID().uuidString
+        UserDefaults.standard.set(fresh, forKey: deviceIDKey)
+        return fresh
+    }
+
+    // MARK: - Profile persistence
+
+    /// The profile is captured during onboarding but no account is required to
+    /// finish it, so the snapshot lives in `UserDefaults` — mirroring the
+    /// onboarding-complete flag — and survives relaunches until a server
+    /// profile replaces it.
+    private static func persist(_ profile: UserProfile) {
+        if let data = try? JSONEncoder().encode(profile) {
+            UserDefaults.standard.set(data, forKey: profileKey)
+        }
+    }
+
+    private static func loadPersistedProfile() -> UserProfile? {
+        guard let data = UserDefaults.standard.data(forKey: profileKey) else { return nil }
+        return try? JSONDecoder().decode(UserProfile.self, from: data)
     }
 }

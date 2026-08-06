@@ -14,4 +14,6 @@ protocol ContentRepository {
     func articles() -> [Article]
     func creditCards() -> [MilitaryCreditCard]
     func infoBenefits() -> [InfoBenefit]
+    func federalBenefits() -> [StateBenefit]
+    func stateGuides() -> [StateGuide]
 }

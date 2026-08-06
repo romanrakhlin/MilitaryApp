@@ -43,6 +43,7 @@ final class AppContainer {
     func makeSessionStore() -> SessionStore {
         SessionStore(
             restoreSession: RestoreSessionUseCase(tokens: tokenStore, profile: profileRepository),
+            deviceLogin: DeviceLoginUseCase(repository: authRepository),
             login: LoginUseCase(repository: authRepository),
             register: RegisterUseCase(repository: authRepository),
             loadProfile: LoadProfileUseCase(repository: profileRepository),
@@ -50,13 +51,14 @@ final class AppContainer {
             completeOnboarding: CompleteOnboardingUseCase(repository: profileRepository),
             logout: LogoutUseCase(tokens: tokenStore),
             deleteAccount: DeleteAccountUseCase(repository: authRepository),
-            clearLocalBenefits: ClearLocalBenefitsUseCase(repository: benefitsRepository)
+            clearLocalBenefits: ClearLocalBenefitsUseCase(repository: benefitsRepository),
+            seedTrackedBenefits: SeedTrackedBenefitsUseCase(repository: benefitsRepository)
         )
     }
 
     @MainActor
     func makeOnboardingStore() -> OnboardingStore {
-        OnboardingStore()
+        OnboardingStore(loadPlaces: LoadPlacesUseCase(repository: placesRepository))
     }
 
     @MainActor

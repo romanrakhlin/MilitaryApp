@@ -15,6 +15,7 @@ struct MilitaryAppApp: App {
     @StateObject private var session: SessionStore
 
     init() {
+        PurchasesManager.configure()
         let container = AppContainer()
         self.container = container
         _session = StateObject(wrappedValue: container.makeSessionStore())

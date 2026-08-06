@@ -22,7 +22,7 @@ struct HomeView: View {
     @State private var showPro = false
     @State private var showDeleteConfirm = false
 
-    private static let privacyPolicyURL = "https://military-app.up.railway.app/privacy"
+    private static let privacyPolicyURL = "https://ancient-cinema-d79.notion.site/Privacy-Policy-Valor-3b3df6f28b7380539b20f74883c9b821?pvs=73"
 
     init(container: AppContainer) {
         _store = StateObject(wrappedValue: container.makeHomeStore())

@@ -12,7 +12,10 @@ import SwiftUI
 /// so it can assemble its own store.
 struct MainTabView: View {
     let container: AppContainer
-    @State private var tab: ValorTab = .home
+    // `-openMap` launch argument (simctl launch … -openMap) boots straight to
+    // the Map tab so automated runs can screenshot it without UI scripting.
+    @State private var tab: ValorTab =
+        ProcessInfo.processInfo.arguments.contains("-openMap") ? .map : .home
 
     var body: some View {
         TabView(selection: $tab) {

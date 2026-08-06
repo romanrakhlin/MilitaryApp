@@ -12,5 +12,6 @@ enum InfoBenefitCategory: String, CaseIterable, Identifiable {
     case airlines = "Airlines"
     case hotels = "Hotels"
     case shopping = "Shopping"
+    case state = "State Benefits"
     var id: String { rawValue }
 }

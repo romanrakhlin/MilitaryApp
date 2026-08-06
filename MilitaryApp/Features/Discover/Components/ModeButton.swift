@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-/// The full-width Free / Discount toggle buttons above the map.
+/// The full-width Free / Discount toggle buttons in the filter sheet.
 struct ModeButton: View {
     let title: String
     let icon: String
@@ -20,11 +20,12 @@ struct ModeButton: View {
                 Image(systemName: icon)
                 Text(title).font(.valorButton(15)).lineLimit(1).minimumScaleFactor(0.8)
             }
-            .foregroundStyle(active ? .white : .black)
+            .foregroundStyle(active ? .white : Valor.textPrimary)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
-            .background(Capsule().fill(active ? AnyShapeStyle(Valor.blue) : AnyShapeStyle(Color.white)))
-            .shadow(radius: 4)
+            .padding(.vertical, 13)
+            .background(Capsule().fill(active ? AnyShapeStyle(Valor.blue) : AnyShapeStyle(Valor.card)))
+            .overlay(Capsule().strokeBorder(active ? Color.clear : Valor.cardStroke))
         }
+        .buttonStyle(ScaleButtonStyle())
     }
 }

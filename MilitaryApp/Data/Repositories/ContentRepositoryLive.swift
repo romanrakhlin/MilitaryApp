@@ -47,6 +47,18 @@ struct ContentRepositoryLive: ContentRepository {
             .init(name: "Southwest Airlines", category: .airlines, badge: "Military fares",
                   blurb: "Discounted military fares bookable by phone, plus two free checked bags for everyone.",
                   urlString: "https://www.southwest.com/html/customer-service/family/military-travel/"),
+            .init(name: "Alaska Airlines", category: .airlines, badge: "Free bags",
+                  blurb: "Up to five free checked bags for active military on orders, plus discounted military fares.",
+                  urlString: "https://www.alaskaair.com/content/travel-info/policies/military-personnel"),
+            .init(name: "JetBlue", category: .airlines, badge: "5% off",
+                  blurb: "5% off flights for military members and veterans through the Veterans Advantage program.",
+                  urlString: "https://www.jetblue.com/deals/military-discount"),
+            .init(name: "Frontier Airlines", category: .airlines, badge: "Free bags",
+                  blurb: "Free carry-on and checked bag for active-duty service members through Frontier's military program.",
+                  urlString: "https://www.flyfrontier.com/deals/military-discounts/"),
+            .init(name: "Allegiant", category: .airlines, badge: "Free bags",
+                  blurb: "Free checked bags, carry-on, and oversized item waivers for active duty and veterans.",
+                  urlString: "https://www.allegiantair.com/military"),
 
             // Hotels
             .init(name: "Marriott", category: .hotels, badge: "Gov rate",
@@ -61,6 +73,18 @@ struct ContentRepositoryLive: ContentRepository {
             .init(name: "Wyndham", category: .hotels, badge: "Gov rate",
                   blurb: "Government and military per-diem rates at participating hotels.",
                   urlString: "https://www.wyndhamhotels.com/deals/government-rates"),
+            .init(name: "Best Western", category: .hotels, badge: "Military rate",
+                  blurb: "Government and military rates at most locations, on or off duty.",
+                  urlString: "https://www.bestwestern.com/en_US/hotels/discounts/military-hotel-discounts.html"),
+            .init(name: "Hyatt", category: .hotels, badge: "Gov rate",
+                  blurb: "Government and military rates at participating Hyatt hotels worldwide.",
+                  urlString: "https://www.hyatt.com/special-offers/government-rate"),
+            .init(name: "Choice Hotels", category: .hotels, badge: "Gov rate",
+                  blurb: "Government rates at Comfort Inn, Quality Inn, Cambria, and other Choice brands.",
+                  urlString: "https://www.choicehotels.com/deals/government-hotel-rates"),
+            .init(name: "Motel 6", category: .hotels, badge: "10% off",
+                  blurb: "10% off every stay for military members and veterans — no verification hoops.",
+                  urlString: "https://www.motel6.com/en/deals/military-discount.html"),
 
             // Shopping
             .init(name: "Nike", category: .shopping, badge: "10% off",
@@ -74,9 +98,25 @@ struct ContentRepositoryLive: ContentRepository {
                   urlString: "https://www.lowes.com/l/military-discount.html"),
             .init(name: "Apple", category: .shopping, badge: "Special store",
                   blurb: "Special pricing on Mac, iPad, and more through the Veterans and Military store.",
-                  urlString: "https://www.apple.com/shop/browse/home/veteransandmilitary")
+                  urlString: "https://www.apple.com/shop/browse/home/veteransandmilitary"),
+            .init(name: "Under Armour", category: .shopping, badge: "20% off",
+                  blurb: "20% off for military, veterans, and first responders — verify online with ID.me.",
+                  urlString: "https://www.underarmour.com/en-us/t/military-first-responder-discount.html"),
+            .init(name: "adidas", category: .shopping, badge: "30% off",
+                  blurb: "30% off online and in-store for military members and veterans, verified with SheerID.",
+                  urlString: "https://www.adidas.com/us/military-discount"),
+            .init(name: "Oakley Standard Issue", category: .shopping, badge: "Pro pricing",
+                  blurb: "Deep pro-level pricing on eyewear and gear for active duty, reserve, and veterans.",
+                  urlString: "https://www.oakleysi.com"),
+            .init(name: "Samsung", category: .shopping, badge: "Up to 30%",
+                  blurb: "Exclusive military pricing on phones, TVs, and appliances through the Samsung Offer Program.",
+                  urlString: "https://www.samsung.com/us/shop/offer-program/military/")
         ]
     }
+
+    func federalBenefits() -> [StateBenefit] { StateBenefitsCatalog.federal }
+
+    func stateGuides() -> [StateGuide] { StateBenefitsCatalog.states }
 
     func chains() -> [NationalChain] {
         [

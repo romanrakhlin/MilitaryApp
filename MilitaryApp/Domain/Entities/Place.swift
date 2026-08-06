@@ -10,7 +10,7 @@ import Foundation
 /// A nearby discount or free location shown on the Discover map + list.
 /// Coordinates are stored as plain doubles so the domain stays framework-free;
 /// the presentation layer converts them to `CLLocationCoordinate2D`.
-struct Place: Identifiable {
+struct Place: Identifiable, Codable {
     let id: String
     let name: String
     let city: String?

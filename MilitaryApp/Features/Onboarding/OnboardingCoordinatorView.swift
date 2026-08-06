@@ -45,6 +45,19 @@ struct OnboardingCoordinatorView: View {
             .allowsHitTesting(!onboarding.isTransitioning)
         }
         .environmentObject(onboarding)
+        .onAppear {
+            // `-openDiscountPreview` launch argument jumps straight to the
+            // location/map step for automated screenshots.
+            if ProcessInfo.processInfo.arguments.contains("-openDiscountPreview"),
+               let i = onboarding.steps.firstIndex(of: .discountPreview) {
+                onboarding.index = i
+            }
+            // `-finishOnboarding` completes onboarding shortly after launch to
+            // exercise the real onboarding → paywall transition in tests.
+            if ProcessInfo.processInfo.arguments.contains("-finishOnboarding") {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { finish() }
+            }
+        }
     }
 
     // MARK: - Routing
@@ -54,7 +67,6 @@ struct OnboardingCoordinatorView: View {
         switch onboarding.current {
         case .welcome:
             WelcomeScreen(onStart: onboarding.next)
-        case .socialProof:      SocialProofScreen(onNext: onboarding.next)
         case .describe:         DescribeScreen(onNext: onboarding.next)
         case .goal:             GoalScreen(onNext: onboarding.next)
         case .branch:           BranchScreen(onNext: onboarding.next)
@@ -73,10 +85,10 @@ struct OnboardingCoordinatorView: View {
         }
     }
 
-    /// Last step's Continue: hand the captured draft to the session and enter
-    /// the app. No account is required to finish onboarding.
+    /// Last step's Continue: hand the captured draft to the session, which
+    /// persists it (locally and, via the device session, on the backend) and
+    /// enters the app.
     private func finish() {
-        session.profile = onboarding.profile
-        session.completeOnboarding()
+        Task { await session.finishOnboarding(draft: onboarding.profile) }
     }
 }

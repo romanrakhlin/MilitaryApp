@@ -11,7 +11,6 @@ import Foundation
 /// per-profile in `OnboardingStore.steps`.
 enum OnboardingStep: Hashable {
     case welcome
-    case socialProof
     case describe
     case goal
     case branch

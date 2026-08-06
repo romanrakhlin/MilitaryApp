@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-/// A pill filter chip on the Discover map (All / Chains / categories).
+/// A pill filter chip in the Discover filter sheet (All / categories).
 struct FilterChip: View {
     let title: String
     var systemImage: String? = nil
@@ -18,12 +18,14 @@ struct FilterChip: View {
         Button(action: action) {
             HStack(spacing: 6) {
                 if let systemImage { Image(systemName: systemImage) }
-                Text(title).font(.valorButton(14))
+                Text(title).font(.valorButton(14)).lineLimit(1).minimumScaleFactor(0.8)
             }
-            .foregroundStyle(active ? .white : .black)
-            .padding(.horizontal, 14).padding(.vertical, 10)
-            .background(Capsule().fill(active ? AnyShapeStyle(Color.orange) : AnyShapeStyle(Color.white)))
-            .shadow(radius: 3)
+            .foregroundStyle(active ? .white : Valor.textPrimary)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 12).padding(.vertical, 11)
+            .background(Capsule().fill(active ? AnyShapeStyle(Valor.blue) : AnyShapeStyle(Valor.card)))
+            .overlay(Capsule().strokeBorder(active ? Color.clear : Valor.cardStroke))
         }
+        .buttonStyle(ScaleButtonStyle())
     }
 }

@@ -14,10 +14,18 @@ struct AuthRepositoryLive: AuthRepository {
     let tokens: TokenStore
 
     private struct AuthBody: Encodable { let email: String; let password: String; let name: String? }
+    private struct DeviceBody: Encodable { let deviceId: String }
 
     func login(email: String, password: String) async throws -> Account {
         try await authenticate(path: "/auth/login",
                                body: AuthBody(email: email, password: password, name: nil))
+    }
+
+    func deviceLogin(deviceId: String) async throws -> Account {
+        let res: LoginResponse = try await api.post("/auth/device", DeviceBody(deviceId: deviceId), authorized: false)
+        tokens.accessToken = res.accessToken
+        tokens.refreshToken = res.refreshToken
+        return ProfileMapper.account(from: res.user)
     }
 
     func register(email: String, password: String, name: String?) async throws -> Account {

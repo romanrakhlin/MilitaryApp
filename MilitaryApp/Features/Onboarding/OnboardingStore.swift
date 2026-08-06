@@ -19,6 +19,15 @@ final class OnboardingStore: ObservableObject {
     /// Drives the slide direction so Back reverses the transition.
     @Published var goingForward = true
 
+    /// Pins for the discount-preview map, loaded once a location fix exists.
+    @Published private(set) var nearbyPlaces: [Place] = []
+
+    private let loadPlaces: LoadPlacesUseCase
+
+    init(loadPlaces: LoadPlacesUseCase) {
+        self.loadPlaces = loadPlaces
+    }
+
     /// True while a step transition is animating. The coordinator disables all
     /// hit-testing during this window, so nothing can be tapped (and no stray
     /// haptics fire) until the slide fully settles. Also guards next()/back()
@@ -36,7 +45,7 @@ final class OnboardingStore: ObservableObject {
         let isDependent = status == .dependent
         let isServing = status == .activeDuty || status == .reservesGuard
 
-        var s: [OnboardingStep] = [.welcome, .socialProof, .describe, .goal]
+        var s: [OnboardingStep] = [.welcome, .describe, .goal]
 
         if !isDependent { s.append(.branch) }
         if status == .reservesGuard { s += [.reserveComponent, .dutyStatus] }
@@ -61,6 +70,26 @@ final class OnboardingStore: ObservableObject {
     var showsChrome: Bool { current != .welcome }
 
     var canGoBack: Bool { index > 0 }
+
+    // MARK: - Nearby places
+
+    /// Best-effort fetch for the discount-preview map. Onboarding runs before
+    /// any sign-in, so a failure (e.g. the backend requiring auth) just leaves
+    /// the map pin-free — the preview still centers on the user.
+    @MainActor
+    func loadNearbyPlaces(lat: Double, lng: Double) async {
+        guard nearbyPlaces.isEmpty else { return }
+        // The anonymous device sign-in races this fetch on a cold launch, so
+        // briefly retry instead of giving up on the first 401.
+        for attempt in 0..<3 {
+            if attempt > 0 { try? await Task.sleep(for: .seconds(2)) }
+            guard !Task.isCancelled else { return }
+            if let places = try? await loadPlaces(lat: lat, lng: lng, radiusMiles: 10), !places.isEmpty {
+                nearbyPlaces = Array(places.prefix(30))
+                return
+            }
+        }
+    }
 
     // MARK: - Navigation
 

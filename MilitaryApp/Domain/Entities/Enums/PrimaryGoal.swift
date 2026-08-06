@@ -12,7 +12,7 @@ enum PrimaryGoal: String, CaseIterable, Codable, Identifiable {
     case maximize = "Maximize my benefits"
     case discounts = "Find discounts near me"
     case saveDaily = "Save money day to day"
-    case retirement = "Understand my retirement options"
+    case retirement = "Understand my retirement"
     case other = "Other"
     var id: String { rawValue }
 

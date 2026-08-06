@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C62342F53022180000ED1FBD /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = C62342F33022180000ED1FBD /* RevenueCat */; };
+		C62342F63022180000ED1FBD /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = C62342F43022180000ED1FBD /* RevenueCatUI */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		C62342D73022171F00ED1FBD /* MilitaryApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MilitaryApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +28,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C62342F53022180000ED1FBD /* RevenueCat in Frameworks */,
+				C62342F63022180000ED1FBD /* RevenueCatUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +72,8 @@
 			);
 			name = MilitaryApp;
 			packageProductDependencies = (
+				C62342F33022180000ED1FBD /* RevenueCat */,
+				C62342F43022180000ED1FBD /* RevenueCatUI */,
 			);
 			productName = MilitaryApp;
 			productReference = C62342D73022171F00ED1FBD /* MilitaryApp.app */;
@@ -94,6 +103,9 @@
 			);
 			mainGroup = C62342CE3022171F00ED1FBD;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C62342F23022180000ED1FBD /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C62342D83022171F00ED1FBD /* Products */;
 			projectDirPath = "";
@@ -266,7 +278,7 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
@@ -313,7 +325,7 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
@@ -357,6 +369,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C62342F23022180000ED1FBD /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios-spm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C62342F33022180000ED1FBD /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C62342F23022180000ED1FBD /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCat;
+		};
+		C62342F43022180000ED1FBD /* RevenueCatUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C62342F23022180000ED1FBD /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCatUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C62342CF3022171F00ED1FBD /* Project object */;
 }
